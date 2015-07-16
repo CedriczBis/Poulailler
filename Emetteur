@@ -12,7 +12,7 @@ Ce fichier de code Arduino est l'émetteur du Poulailler connecté.
 //Librairies pour la radio 
 #include <SPI.h>
 #include <nRF24L01.h>
-#include <RF24.h
+#include <RF24.h>
 
 //Defines pour la radio
 #define CE_PIN 9
@@ -28,9 +28,9 @@ const int seuilLuminosite = 30; //Seuil de déclenchement de la porte
 int luminosite = 0; //indice de luminosité
 
 //Lumières
-const int ledVerte = 5;
-const int ledBleu = 4;
-const int ledRouge = 6;
+const int ledV = 5;
+const int ledB = 4;
+const int ledR = 6;
 
 Servo moteurPorte;  // creation du servo pour le moteur de la porte
 
@@ -62,12 +62,12 @@ void loop(void) {
   radio.write(luminositeRadio, sizeof(luminositeRadio)); //envoi de la valeur de luminosite au récepteur
   
   if (luminosite < seuilLuminosite) {
-    moteurPorte.write(120);
+    moteurPorte.write(90);
     digitalWrite(ledV, LOW);
     digitalWrite(ledB, LOW);
     digitalWrite(ledR, HIGH);
   }else{
-    moteurPorte.write(0);
+    moteurPorte.write(180);
     digitalWrite(ledV, HIGH);
     digitalWrite(ledB, LOW);
     digitalWrite(ledR, LOW);
