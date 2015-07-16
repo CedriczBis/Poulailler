@@ -62,12 +62,12 @@ void loop(void) {
   radio.write(luminositeRadio, sizeof(luminositeRadio)); //envoi de la valeur de luminosite au récepteur
   
   if (luminosite < seuilLuminosite) {
-    moteurPorte.write(90);
+    moteurPorte.write(180);
     digitalWrite(ledV, LOW);
     digitalWrite(ledB, LOW);
     digitalWrite(ledR, HIGH);
   }else{
-    moteurPorte.write(180);
+    moteurPorte.write(50);
     digitalWrite(ledV, HIGH);
     digitalWrite(ledB, LOW);
     digitalWrite(ledR, LOW);
