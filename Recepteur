@@ -1,0 +1,47 @@
+/*
+Ce fichier de code Arduino est le récepteur du Poulailler connecté. 
+  1)  Il boucle en continue en attente d'une valeur du récepteur radio
+  2)  S'il reçoit une valeur, il l'a diffuse sur la sortie série.
+  3)  S'il ne la recoit pas, il diffuse un message d'erreur sur la sortie série.
+*/
+
+//Librairies pour la radio 
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h>
+
+//Defines pour la radio
+#define CE_PIN 9
+#define CSN_PIN 10
+
+const uint64_t pipe = 0xE8E8F0F0E1LL;//Canal de recéption commun entre l'émetteur et le récepteur
+
+RF24 radio(CE_PIN, CSN_PIN); //Création de la variable radio
+
+int luminosite[1]; //Entrée pour la radio
+
+void setup(){
+  Serial.begin(9600);
+  delay(1000);
+  
+  Serial.println("Nrf24L01 Receiver Starting");
+  
+  //Démarrage de la radio
+  radio.begin();
+  radio.openReadingPipe(1,pipe);
+  radio.startListening();
+}
+
+void loop(){
+  if ( radio.available() ){
+    bool done = false;
+    while (!done){
+      done = radio.read( luminosite, sizeof(luminosite) );
+      Serial.print("Luminosity = ");
+      Serial.println(luminosite[0]);
+    }
+  }else{
+    Serial.println("No signal");
+}
+delay (2000);
+}
