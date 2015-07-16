@@ -1,0 +1,76 @@
+/*
+Ce fichier de code Arduino est l'émetteur du Poulailler connecté. 
+  1)  Il récupère la valeur de lumière
+  2)  Il la transforme en pourcentage
+  3)  Il l'envoi au récepteur par onde RADIO (433Mhz)
+  4)  En fonction du pourcentage et du seuil de luminosité choisit, il ouvre ou ferme la porte du poulailler.
+  5)  Pour finir il change la lumière d'une LED en fonction de l'état de la porte (OUVERT/FERME)
+*/
+
+#include <Servo.h>//librairie pour le moteur de la porte
+
+//Librairies pour la radio 
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h
+
+//Defines pour la radio
+#define CE_PIN 9
+#define CSN_PIN 10
+
+const uint64_t pipe = 0xE8E8F0F0E1LL; //Canal d'emmission commun entre l'émetteur et le récepteur
+
+RF24 radio(CE_PIN, CSN_PIN); //Création de la variable radio
+
+//Variables liées au capteur de luminosité
+const int pinCapteurLumiere = A0; //Constante de la pin du capteur de luminosité
+const int seuilLuminosite = 30; //Seuil de déclenchement de la porte
+int luminosite = 0; //indice de luminosité
+
+//Lumières
+const int ledVerte = 5;
+const int ledBleu = 4;
+const int ledRouge = 6;
+
+Servo moteurPorte;  // creation du servo pour le moteur de la porte
+
+//Sortie pour la radio
+int luminositeRadio[1];
+
+void setup(void) {
+  Serial.begin(9600); //Fréquence de fonctionnement des baux 
+  delay(1000);
+  
+  //initialise la radio d'emission 
+  radio.begin();
+  radio.openWritingPipe(pipe);
+  
+  moteurPorte.attach(7);//Défini le pin numérique pour le moteur de la porte
+  
+  //Défini le mode des trois pins de la lampe
+  pinMode(ledV, OUTPUT);
+  pinMode(ledB, OUTPUT);
+  pinMode(ledR, OUTPUT);
+}
+
+void loop(void) {
+  
+  luminosite = map(analogRead(pinCapteurLumiere),0,1023,0,100); //Mappage en pourcentage
+  luminositeRadio[0] = luminosite;
+  
+  //Serial.println(luminositeRadio[0]); //pour débugage
+  radio.write(luminositeRadio, sizeof(luminositeRadio)); //envoi de la valeur de luminosite au récepteur
+  
+  if (luminosite < seuilLuminosite) {
+    moteurPorte.write(120);
+    digitalWrite(ledV, LOW);
+    digitalWrite(ledB, LOW);
+    digitalWrite(ledR, HIGH);
+  }else{
+    moteurPorte.write(0);
+    digitalWrite(ledV, HIGH);
+    digitalWrite(ledB, LOW);
+    digitalWrite(ledR, LOW);
+  }
+  delay(500);
+}
